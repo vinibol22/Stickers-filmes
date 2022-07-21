@@ -15,77 +15,35 @@ import br.com.stickersfilmes.json.JsonParser;
 public class App {
 
 	 public static void main(String[] args) throws Exception {
+		   // fazer uma conexão HTTP e buscar os top 250 filmes
 
-	        // fazer uma conexão HTTP e buscar os top 250 filmes
-	        String url = "https://imdb-api.com/en/API/Top250Movies/k_c90ltqkg";	
-	        
-          
+	        // String url = "https://imdb-api.com/en/API/Top250Movies/k_0ojt0yvm";
+	        // String url = "https://raw.githubusercontent.com/alura-cursos/imersao-java/api/TopMovies.json";
+	        // ExtratorDeConteudo extrator = new ExtratorDeConteudoDoIMDB();
 
-	        URI endereco = URI.create(url);
-	        var client = HttpClient.newHttpClient();
-	        var request = HttpRequest.newBuilder(endereco).GET().build();
-	        HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
-	        String body = response.body();
+	        // String url = "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY&start_date=2022-06-12&end_date=2022-06-14";
+	        String url = "https://raw.githubusercontent.com/alura-cursos/imersao-java/api/NASA-APOD.json";
+	        ExtratorDeConteudo extrator = new ExtratorDeConteudoDaNasa();
 
-	        // extrair só os dados que interessam (titulo, poster, classificação)
-	        var parser = new JsonParser();
-	        List<Map<String, String>> listaDeFilmes = parser.parse(body);
+	        var http = new ClienteHttp();
+	        String json = http.buscaDados(url);
 
-           
-
-	        
 	        // exibir e manipular os dados 
+	        List<Conteudo> conteudos = extrator.extraiConteudos(json);
+
 	        var geradora = new GeradoraDeFigurinhas();
 
-	        String cincoEstrelas = "\u2B50"+"\u2B50"+"\u2B50"+"\u2B50"+"\u2B50";
-	        String quatroEstrelas = "\u2B50"+"\u2B50"+"\u2B50"+"\u2B50";
-	        String tresEstrelas = "\u2B50"+"\u2B50"+"\u2B50";
-	        String duasEstrelas = "\u2B50"+"\u2B50";
-	        String umaEstrela = "\u2B50";
-	        for (Map<String,String> filme : listaDeFilmes) {
-	        	if(listaDeFilmes.size() <= 2) {
-	        	String rating = filme.get("imDbRating");
-	        	
-	        	   String urlImagem = filme.get("image");
-	               String titulo = filme.get("title");
+	        for (int i = 0; i < 3; i++) {
 
-	               InputStream inputStream = new URL(urlImagem).openStream();
-	               String nomeArquivo = titulo + ".png";
+	            Conteudo conteudo = conteudos.get(i);
 
-	               geradora.criar(inputStream, nomeArquivo);
+	            InputStream inputStream = new URL(conteudo.getUrlImagem()).openStream();
+	            String nomeArquivo = "saida/" + conteudo.getTitulo() + ".png";
 
-	        	
-	        	
-	        	
-	        	
-	        	
-	        	double ratingDouble = Double.parseDouble(rating);
-	        	System.out.println(filme.get("title"));
-	            System.out.println(filme.get("image"));
-	           
-	            
-	          //  String titulo = filme.get("title");
-	            //String nomeArquivo = titulo + ".png";
-	            
-	            if(ratingDouble >=8.0) {
-	            	rating=cincoEstrelas;
-	            	System.out.println(rating);
-	            	};
-	            if(ratingDouble >= 6.0 && ratingDouble < 8.0) {
-	            	rating =quatroEstrelas;
-	            	System.out.println(rating);
-	            	}
-	           if(ratingDouble >= 4.0 && ratingDouble < 6.0) {
-	        	   rating = tresEstrelas;
-	        	   System.out.println(rating);} 
-	           if(ratingDouble >=2.0 && ratingDouble <4.0) {
-	        	   rating = duasEstrelas;
-	        	   System.out.println(rating);}
-	           if(ratingDouble < 2.0 ) {
-	        	   rating = umaEstrela;
-	        	   System.out.println(rating);}
-	           
-	            
+	            geradora.cria(inputStream, nomeArquivo);
+
+	            System.out.println(conteudo.getTitulo());
+	            System.out.println();
 	        }
-	    }}
+	    }
 }
